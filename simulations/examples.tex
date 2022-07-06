@@ -137,11 +137,17 @@ Our secondary goal is the search for estimators for unknown coupon
 number when we stop the collection at some chosen step. Performances of
 proposed estimators are studied both theoretically and by simulations.
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(coupon)}
+\end{Highlighting}
+\end{Shaded}
+
 \hypertarget{from-equal-to-linear-probability-models}{%
 \section{From equal to linear probability
 models}\label{from-equal-to-linear-probability-models}}
 
-We consider that the collection is made of \(N\) coupons with two
+We consider that the collection is made of \(N\) coupons with three
 possibles models.
 
 \begin{enumerate}
@@ -161,7 +167,18 @@ possibles models.
   the linear probability model:
 \end{enumerate}
 
-\[p_i = \frac{1}{N}\,,\quad i = 1,\ldots, N\,.\] with \(\beta \in []\).
+\[p_i = \frac{1}{N}\,,\quad i = 1,\ldots, N\,,\] with
+\(\beta \in [0, \frac{2}{N(N-1)}]\).
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  the 2-probability model:
+\end{enumerate}
+
+\[p_i = \frac{1}{N}\,,\quad i = 1,\ldots, N\,.\]
 
 \hypertarget{the-log-linear-expectation-in-equality-case}{%
 \subsection{The log-linear expectation in equality
@@ -171,85 +188,197 @@ In case 1 we can easily verify the well-known asymptotic result:
 
 \[\mathbb E [T] \approx N(\ln N + \gamma)\]
 
-For \(N \in \{10,20,30,...,100,200,300,...,1000,2000,...,10000\}\) we
-simulate \(10^3\) coupon problems. We show the detailed code using our
-package \texttt{coupon} available on GitHub (\url{zfgzgz})
+For \(N \in \{1,...,200\}\) we simulate \(10^3\) coupon problems. We
+show the detailed code using our package \texttt{coupon} available on
+GitHub (\url{https://github.com/vrunge/coupon})
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\FunctionTok{library}\NormalTok{(coupon)}
+\NormalTok{res\_coupon }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(n, }\AttributeTok{nb\_iterations =} \DecValTok{10}\NormalTok{)}
+\NormalTok{\{}
+  \FunctionTok{mean}\NormalTok{(}\FunctionTok{replicate}\NormalTok{(nb\_iterations, }\FunctionTok{simu.coupon}\NormalTok{(}\AttributeTok{nbCoupons =}\NormalTok{ n)))}
+\NormalTok{\}}
+\NormalTok{res\_theory }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(n)\{n}\SpecialCharTok{*}\NormalTok{(}\FunctionTok{log}\NormalTok{(n) }\SpecialCharTok{{-}} \FunctionTok{digamma}\NormalTok{(}\DecValTok{1}\NormalTok{))\}}
 
-\NormalTok{u }\OtherTok{\textless{}{-}} \DecValTok{5}
-
-\NormalTok{nbCoupons }\OtherTok{\textless{}{-}} \DecValTok{100}
-\NormalTok{myN }\OtherTok{\textless{}{-}} \DecValTok{300}
-\FunctionTok{image}\NormalTok{(res }\OtherTok{\textless{}{-}} \FunctionTok{plot.tables}\NormalTok{(}\AttributeTok{nbCoupons =}\NormalTok{ nbCoupons, }\AttributeTok{N =}\NormalTok{ myN))}
+\NormalTok{N }\OtherTok{\textless{}{-}} \DecValTok{200}
+\NormalTok{moyenne\_resultat1 }\OtherTok{\textless{}{-}} \FunctionTok{sapply}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\NormalTok{N, res\_coupon)}
+\NormalTok{moyenne\_theorique }\OtherTok{\textless{}{-}} \FunctionTok{sapply}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\NormalTok{N, res\_theory)}
+\FunctionTok{plot}\NormalTok{(moyenne\_resultat1, }\AttributeTok{xlab =} \StringTok{"Nombre de coupons"}\NormalTok{, }\AttributeTok{ylab =} \StringTok{"Nombre d\textquotesingle{}articles à acheter"}\NormalTok{)}
+\FunctionTok{lines}\NormalTok{(moyenne\_theorique)}
 \end{Highlighting}
 \end{Shaded}
 
 \includegraphics{examples_files/figure-latex/unnamed-chunk-2-1.pdf}
 
+\hypertarget{estimation-of-n}{%
+\section{Estimation of N}\label{estimation-of-n}}
+
+\hypertarget{a-nice-picture}{%
+\subsection{A nice picture}\label{a-nice-picture}}
+
+We give a few examples of dynamics in the coupon problem. The x-axis
+represents the time dynamics and the colors the number of observations
+for each coupon sorted from the highest occcurrence (bottom) to the
+smallest (0 if collection not completed) (top)
+
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{c2 }\OtherTok{\textless{}{-}} \FunctionTok{apply}\NormalTok{(res, }\DecValTok{1}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(x) }\FunctionTok{sum}\NormalTok{(x }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{))}
+\NormalTok{nbCoupons }\OtherTok{\textless{}{-}} \DecValTok{200}
+\NormalTok{myN }\OtherTok{\textless{}{-}} \DecValTok{1000}
+\FunctionTok{image}\NormalTok{(res }\OtherTok{\textless{}{-}} \FunctionTok{dynamicCollection}\NormalTok{(}\AttributeTok{nbCoupons =}\NormalTok{ nbCoupons, }\AttributeTok{N =}\NormalTok{ myN))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{examples_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{image}\NormalTok{(res}\SpecialCharTok{\textgreater{}}\DecValTok{0}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{examples_files/figure-latex/unnamed-chunk-3-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{image}\NormalTok{(res}\SpecialCharTok{==}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{examples_files/figure-latex/unnamed-chunk-3-3.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{nbCoupons }\OtherTok{\textless{}{-}} \DecValTok{500}
+\NormalTok{myN }\OtherTok{\textless{}{-}} \DecValTok{1000}
+\FunctionTok{image}\NormalTok{(res }\OtherTok{\textless{}{-}} \FunctionTok{dynamicCollection}\NormalTok{(}\AttributeTok{nbCoupons =}\NormalTok{ nbCoupons, }\AttributeTok{N =}\NormalTok{ myN))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{examples_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{image}\NormalTok{(res}\SpecialCharTok{\textgreater{}}\DecValTok{0}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{examples_files/figure-latex/unnamed-chunk-4-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{image}\NormalTok{(res}\SpecialCharTok{==}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{examples_files/figure-latex/unnamed-chunk-4-3.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{nbCoupons }\OtherTok{\textless{}{-}} \DecValTok{1000}
+\NormalTok{myN }\OtherTok{\textless{}{-}} \DecValTok{1000}
+\FunctionTok{image}\NormalTok{(res }\OtherTok{\textless{}{-}} \FunctionTok{dynamicCollection}\NormalTok{(}\AttributeTok{nbCoupons =}\NormalTok{ nbCoupons, }\AttributeTok{N =}\NormalTok{ myN))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{examples_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{image}\NormalTok{(res}\SpecialCharTok{\textgreater{}}\DecValTok{0}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{examples_files/figure-latex/unnamed-chunk-5-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{image}\NormalTok{(res}\SpecialCharTok{==}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{examples_files/figure-latex/unnamed-chunk-5-3.pdf}
+
+\hypertarget{moment-estimation}{%
+\subsection{Moment estimation}\label{moment-estimation}}
+
+The expected number of coupons at time \(t\) is given by formula
+\[N\Big(1- (1-\frac{1}{N})^t\Big)\] We verify the closeness of the two
+curves (the expectation and the observed counts)
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{nbCoupons }\OtherTok{\textless{}{-}} \DecValTok{100}
+\NormalTok{myN }\OtherTok{\textless{}{-}} \DecValTok{300}
+\FunctionTok{image}\NormalTok{(res }\OtherTok{\textless{}{-}} \FunctionTok{dynamicCollection}\NormalTok{(}\AttributeTok{nbCoupons =}\NormalTok{ nbCoupons, }\AttributeTok{N =}\NormalTok{ myN))}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{examples_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{nb\_time }\OtherTok{\textless{}{-}} \FunctionTok{apply}\NormalTok{(res, }\DecValTok{1}\NormalTok{, }\ControlFlowTok{function}\NormalTok{(x) }\FunctionTok{sum}\NormalTok{(x }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{))}
 
 \NormalTok{curve }\OtherTok{\textless{}{-}}\NormalTok{ nbCoupons}\SpecialCharTok{*}\NormalTok{(}\DecValTok{1}\SpecialCharTok{{-}}\NormalTok{ (}\DecValTok{1{-}1}\SpecialCharTok{/}\NormalTok{nbCoupons)}\SpecialCharTok{\^{}}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\NormalTok{myN))}
-\NormalTok{ylimit }\OtherTok{\textless{}{-}} \FunctionTok{max}\NormalTok{(}\FunctionTok{c}\NormalTok{(c2, curve))}
-\FunctionTok{plot}\NormalTok{(curve, }\AttributeTok{type =} \StringTok{\textquotesingle{}l\textquotesingle{}}\NormalTok{, }\AttributeTok{ylim =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,ylimit))}
+\NormalTok{ylimit }\OtherTok{\textless{}{-}} \FunctionTok{max}\NormalTok{(}\FunctionTok{c}\NormalTok{(nb\_time, curve))}
+\FunctionTok{plot}\NormalTok{(curve, }\AttributeTok{type =} \StringTok{\textquotesingle{}l\textquotesingle{}}\NormalTok{, }\AttributeTok{ylim =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,ylimit), }\AttributeTok{ylab =} \StringTok{""}\NormalTok{)}
 \FunctionTok{par}\NormalTok{(}\AttributeTok{new =} \ConstantTok{TRUE}\NormalTok{)}
-\FunctionTok{plot}\NormalTok{(c2, }\AttributeTok{type =} \StringTok{\textquotesingle{}l\textquotesingle{}}\NormalTok{, }\AttributeTok{col =} \DecValTok{2}\NormalTok{, }\AttributeTok{ylim =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,ylimit))}
-\NormalTok{curve2 }\OtherTok{\textless{}{-}}\NormalTok{ (nbCoupons}\SpecialCharTok{{-}}\NormalTok{u)}\SpecialCharTok{*}\NormalTok{(}\DecValTok{1}\SpecialCharTok{{-}}\NormalTok{ (}\DecValTok{1{-}1}\SpecialCharTok{/}\NormalTok{(nbCoupons}\SpecialCharTok{{-}}\NormalTok{u))}\SpecialCharTok{\^{}}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\NormalTok{myN))}
-\FunctionTok{par}\NormalTok{(}\AttributeTok{new =} \ConstantTok{TRUE}\NormalTok{)}
-\FunctionTok{plot}\NormalTok{(curve2, }\AttributeTok{type =} \StringTok{\textquotesingle{}l\textquotesingle{}}\NormalTok{, }\AttributeTok{col =} \DecValTok{3}\NormalTok{, }\AttributeTok{ylim =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,ylimit))}
+\FunctionTok{plot}\NormalTok{(nb\_time, }\AttributeTok{type =} \StringTok{\textquotesingle{}l\textquotesingle{}}\NormalTok{, }\AttributeTok{col =} \DecValTok{2}\NormalTok{, }\AttributeTok{ylim =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,ylimit), }\AttributeTok{ylab =} \StringTok{"counts"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{examples_files/figure-latex/unnamed-chunk-2-2.pdf}
+\includegraphics{examples_files/figure-latex/unnamed-chunk-6-2.pdf}
+
+Study of the quality of our estimator
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\DocumentationTok{\#\#\#\#\#\#\#}
-
-
-
-\FunctionTok{image}\NormalTok{(res }\SpecialCharTok{==}\DecValTok{1}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{examples_files/figure-latex/unnamed-chunk-2-3.pdf}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{test }\OtherTok{\textless{}{-}}\NormalTok{ res }\SpecialCharTok{==}\DecValTok{7}
-\FunctionTok{plot}\NormalTok{(}\FunctionTok{apply}\NormalTok{(test, }\DecValTok{1}\NormalTok{, sum), }\AttributeTok{type =} \StringTok{\textquotesingle{}l\textquotesingle{}}\NormalTok{)}
-\end{Highlighting}
-\end{Shaded}
-
-\includegraphics{examples_files/figure-latex/unnamed-chunk-2-4.pdf}
-
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{res[myN,]}
+\NormalTok{res }\OtherTok{\textless{}{-}} \FunctionTok{replicate}\NormalTok{(}\DecValTok{1000}\NormalTok{, }\FunctionTok{estimatorExpectation}\NormalTok{(}\AttributeTok{nbCoupons =} \DecValTok{200}\NormalTok{,}\AttributeTok{N =} \DecValTok{300}\NormalTok{))}
+\FunctionTok{mean}\NormalTok{(}\FunctionTok{unlist}\NormalTok{(res[}\DecValTok{1}\NormalTok{,]))}
 \end{Highlighting}
 \end{Shaded}
 
 \begin{verbatim}
-##   [1] 9 9 8 7 6 6 6 6 6 6 5 5 5 5 5 5 5 5 4 4 4 4 4 4 4 4 4 4 4 4 3 3 3 3 3 3 3
-##  [38] 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 2 2 2 2 2 2 2 2 2 2 2 2 2 2
-##  [75] 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0
+## [1] 200.617
 \end{verbatim}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{r }\OtherTok{\textless{}{-}}\NormalTok{ res[myN,]}
-\NormalTok{a1 }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{(r }\SpecialCharTok{==} \DecValTok{3}\NormalTok{)}\SpecialCharTok{/}\FunctionTok{sum}\NormalTok{(r }\SpecialCharTok{==} \DecValTok{4}\NormalTok{)}
-\NormalTok{a2 }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{(r }\SpecialCharTok{==} \DecValTok{2}\NormalTok{)}\SpecialCharTok{/}\FunctionTok{sum}\NormalTok{(r }\SpecialCharTok{==} \DecValTok{3}\NormalTok{)}
-\NormalTok{a3 }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{(r }\SpecialCharTok{==} \DecValTok{1}\NormalTok{)}\SpecialCharTok{/}\FunctionTok{sum}\NormalTok{(r }\SpecialCharTok{==} \DecValTok{2}\NormalTok{)}
-\NormalTok{a4 }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{(r }\SpecialCharTok{==} \DecValTok{0}\NormalTok{)}\SpecialCharTok{/}\FunctionTok{sum}\NormalTok{(r }\SpecialCharTok{==} \DecValTok{1}\NormalTok{)}
-\FunctionTok{plot}\NormalTok{(}\FunctionTok{c}\NormalTok{(a1,a2,a3,a4), }\AttributeTok{type =} \StringTok{\textquotesingle{}l\textquotesingle{}}\NormalTok{)}
+\FunctionTok{sd}\NormalTok{(}\FunctionTok{unlist}\NormalTok{(res[}\DecValTok{1}\NormalTok{,]))}
 \end{Highlighting}
 \end{Shaded}
 
-\includegraphics{examples_files/figure-latex/unnamed-chunk-2-5.pdf}
+\begin{verbatim}
+## [1] 12.53728
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mean}\NormalTok{(}\FunctionTok{unlist}\NormalTok{(res[}\DecValTok{2}\NormalTok{,]))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 155.495
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{sd}\NormalTok{(}\FunctionTok{unlist}\NormalTok{(res[}\DecValTok{2}\NormalTok{,]))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 4.520886
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{hist}\NormalTok{(}\FunctionTok{unlist}\NormalTok{(res[}\DecValTok{1}\NormalTok{,]), }\AttributeTok{breaks =} \DecValTok{100}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{examples_files/figure-latex/unnamed-chunk-7-1.pdf}
 
 \end{document}

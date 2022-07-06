@@ -42,3 +42,23 @@ simu.couponCensored <- function(nbCoupons = 30, prob = rep(1,nbCoupons), N = 100
   return(sum(coupons > 0))
 }
 
+
+
+
+
+
+estimatorExpectation <- function(nbCoupons = 200, prob = rep(1,nbCoupons), N = 300)
+{
+  nb_time <- apply(dynamicCollection(nbCoupons = nbCoupons,prob = prob, N = N), 1, function(x) sum(x > 0))
+  test <- Inf
+  for(nb in max(nb_time):(max(nb_time)+N))
+  {
+    newTest <- sum((nb_time-nb*(1- (1-1/nb)^(1:myN)))^2)
+    if(newTest < test)
+    {
+      test <- newTest
+      myNB <- nb
+    }
+  }
+  return(list(estimation = myNB, max_observation = max(nb_time)))
+}

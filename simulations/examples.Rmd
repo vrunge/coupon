@@ -25,10 +25,14 @@ In this work we study the coupon collector's problem in the more generic case of
 
 Our secondary goal is the search for estimators for unknown coupon number when we stop the collection at some chosen step. Performances of proposed estimators are studied both theoretically and by simulations.
 
+```{r}
+library(coupon)
+```
+
 
 # From equal to linear probability models
 
-We consider that the collection is made of $N$ coupons with two possibles models.
+We consider that the collection is made of $N$ coupons with three possibles models.
 
 1. the equal probability model:
 
@@ -36,8 +40,13 @@ $$p_i = \frac{1}{N}\,,\quad i = 1,\ldots, N\,.$$
 
 2. the linear probability model:
 
+$$p_i = \frac{1}{N}\,,\quad i = 1,\ldots, N\,,$$
+with $\beta \in [0, \frac{2}{N(N-1)}]$.
+
+
+3. the 2-probability model:
+
 $$p_i = \frac{1}{N}\,,\quad i = 1,\ldots, N\,.$$
-with $\beta \in []$.
 
 ## The log-linear expectation in equality case
 
@@ -45,58 +54,100 @@ In case 1 we can easily verify the well-known asymptotic result:
 
 $$\mathbb E [T] \approx N(\ln N + \gamma)$$
 
-For $N \in \{10,20,30,...,100,200,300,...,1000,2000,...,10000\}$ we simulate $10^3$ coupon problems. We show the detailed code using our package `coupon` available on GitHub (\url{zfgzgz})
+For $N \in \{1,...,200\}$ we simulate $10^3$ coupon problems. We show the detailed code using our package `coupon` available on GitHub (\url{https://github.com/vrunge/coupon})
 
 ```{r}
 
+res_coupon <- function(n, nb_iterations = 10)
+{
+  mean(replicate(nb_iterations, simu.coupon(nbCoupons = n)))
+}
+res_theory <- function(n){n*(log(n) - digamma(1))}
+
+N <- 200
+moyenne_resultat1 <- sapply(1:N, res_coupon)
+moyenne_theorique <- sapply(1:N, res_theory)
+plot(moyenne_resultat1, xlab = "Nombre de coupons", ylab = "Nombre d'articles à acheter")
+lines(moyenne_theorique)
+```
+
+
+
+
+
+
+# Estimation of N
+
+## A nice picture
+
+We give a few examples of dynamics in the coupon problem.
+The x-axis represents the time dynamics and the colors the number of observations for each coupon sorted from the highest occcurrence (bottom) to the smallest (0 if collection not completed) (top)
+
+```{r}
+nbCoupons <- 200
+myN <- 1000
+image(res <- dynamicCollection(nbCoupons = nbCoupons, N = myN))
+image(res>0)
+image(res==1)
 ```
 
 
 
 ```{r}
+nbCoupons <- 500
+myN <- 1000
+image(res <- dynamicCollection(nbCoupons = nbCoupons, N = myN))
+image(res>0)
+image(res==1)
+```
 
-library(coupon)
 
-u <- 5
+```{r}
+nbCoupons <- 1000
+myN <- 1000
+image(res <- dynamicCollection(nbCoupons = nbCoupons, N = myN))
+image(res>0)
+image(res==1)
+```
 
+
+## Moment estimation
+
+The expected number of coupons at time $t$ is given by formula
+$$N\Big(1- (1-\frac{1}{N})^t\Big)$$
+We verify the closeness of the two curves (the expectation and the observed counts)
+
+```{r}
 nbCoupons <- 100
 myN <- 300
-image(res <- plot.tables(nbCoupons = nbCoupons, N = myN))
-
-c2 <- apply(res, 1, function(x) sum(x > 0))
+image(res <- dynamicCollection(nbCoupons = nbCoupons, N = myN))
+nb_time <- apply(res, 1, function(x) sum(x > 0))
 
 curve <- nbCoupons*(1- (1-1/nbCoupons)^(1:myN))
-ylimit <- max(c(c2, curve))
-plot(curve, type = 'l', ylim = c(0,ylimit))
+ylimit <- max(c(nb_time, curve))
+plot(curve, type = 'l', ylim = c(0,ylimit), ylab = "")
 par(new = TRUE)
-plot(c2, type = 'l', col = 2, ylim = c(0,ylimit))
-curve2 <- (nbCoupons-u)*(1- (1-1/(nbCoupons-u))^(1:myN))
-par(new = TRUE)
-plot(curve2, type = 'l', col = 3, ylim = c(0,ylimit))
-
-
-#######
-
-
-
-image(res ==1)
-test <- res ==7
-plot(apply(test, 1, sum), type = 'l')
-
-
-res[myN,]
-
-r <- res[myN,]
-a1 <- sum(r == 3)/sum(r == 4)
-a2 <- sum(r == 2)/sum(r == 3)
-a3 <- sum(r == 1)/sum(r == 2)
-a4 <- sum(r == 0)/sum(r == 1)
-plot(c(a1,a2,a3,a4), type = 'l')
-
-
-
-
+plot(nb_time, type = 'l', col = 2, ylim = c(0,ylimit), ylab = "counts")
 ```
+
+
+
+Study of the quality of our estimator
+
+
+```{r}
+res <- replicate(1000, estimatorExpectation(nbCoupons = 200,N = 300))
+mean(unlist(res[1,]))
+sd(unlist(res[1,]))
+mean(unlist(res[2,]))
+sd(unlist(res[2,]))
+hist(unlist(res[1,]), breaks = 100)
+```
+
+
+
+
+
 
 
 
