@@ -46,7 +46,8 @@ with $\beta \in [0, \frac{2}{N(N-1)}]$.
 
 3. the 2-probability model:
 
-$$p_i = \frac{1}{N}\,,\quad i = 1,\ldots, N\,.$$
+$$p_i = \alpha\,,\quad i = 1,\ldots, S\,.$$
+$$p_i = \beta\,,\quad i = s+1,\ldots, N\,.$$
 
 ## The log-linear expectation in equality case
 
@@ -137,6 +138,7 @@ Study of the quality of our estimator
 
 ```{r}
 res <- replicate(1000, estimatorExpectation(nbCoupons = 200,N = 300))
+
 mean(unlist(res[1,]))
 sd(unlist(res[1,]))
 mean(unlist(res[2,]))
@@ -145,8 +147,20 @@ hist(unlist(res[1,]), breaks = 100)
 ```
 
 
+Sample the result the generate confidence internval
+
+```{r}
+res <- couponCensored(nbCoupons = 200, N = 300, type = "1")$coupons
+```
 
 
+
+
+# https://en.wikipedia.org/wiki/Characteristic_function_(probability_theory)
+# can get results with sum of geom for moments in equal prob case
+
+
+#https://www.sciencedirect.com/science/article/pii/S0047259X09000840
 
 
 
